@@ -1,0 +1,15 @@
+{
+    "title": "ChromaDB",
+    "name": "chromadb",
+    "type": "plugin",
+    "ps": "ChromaDB vector database manager: one-click install, hardened systemd service (localhost only), optional remote access with token/IP allow-list/SSL, collections and backups. EN/ES.",
+    "versions": "1.1.0",
+    "checks": [
+        "/www/server/panel/plugin/chromadb"
+    ],
+    "author": "Jose Alexis Correa valencia",
+    "home": "https://github.com/jalexiscv/chromadb-plugin-for-aapanel",
+    "date": "2026-11-10",
+    "default": false,
+    "display": 0
+}

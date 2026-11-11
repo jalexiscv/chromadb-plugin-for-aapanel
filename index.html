@@ -1,0 +1,538 @@
+<style>
+.chroma-plugin{display:flex;height:100%;font-size:12px;color:#333}
+.chroma-plugin .cm-menu{width:140px;border-right:1px solid #e6e6e6;background:#fafafa;flex-shrink:0;display:flex;flex-direction:column}
+.chroma-plugin .cm-menu p{padding:0 16px;line-height:42px;cursor:pointer;margin:0;border-left:3px solid transparent}
+.chroma-plugin .cm-menu p:hover{background:#f0f0f0}
+.chroma-plugin .cm-menu p.on{background:#fff;border-left-color:#20a53a;color:#20a53a;font-weight:600}
+.chroma-plugin .cm-lang{margin-top:auto;padding:12px 16px;color:#999;border-top:1px solid #eee}
+.chroma-plugin .cm-lang select{width:100%;height:26px;border:1px solid #ddd;border-radius:3px;margin-top:4px}
+.chroma-plugin .cm-body{flex:1;padding:18px 22px;overflow:auto}
+.chroma-plugin .cm-pane{display:none}
+.chroma-plugin .cm-pane.on{display:block}
+.chroma-plugin h3{font-size:14px;margin:0 0 12px;font-weight:600}
+.chroma-plugin .cm-kv{width:100%;border-collapse:collapse;margin-bottom:14px}
+.chroma-plugin .cm-kv th,.chroma-plugin .cm-kv td{border:1px solid #e6e6e6;padding:8px 10px;text-align:left;vertical-align:middle}
+.chroma-plugin .cm-kv th{width:150px;background:#f7f7f7;font-weight:normal;color:#666}
+.chroma-plugin .cm-tbl{width:100%;border-collapse:collapse}
+.chroma-plugin .cm-tbl th{background:#f7f7f7;font-weight:normal;color:#666}
+.chroma-plugin .cm-tbl th,.chroma-plugin .cm-tbl td{border-bottom:1px solid #eee;padding:8px;text-align:left}
+.chroma-plugin .cm-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:#bbb}
+.chroma-plugin .cm-dot.ok{background:#20a53a}.chroma-plugin .cm-dot.bad{background:#ef0808}.chroma-plugin .cm-dot.warn{background:#f0ad4e}
+.chroma-plugin .cm-btn{display:inline-block;padding:0 14px;height:30px;line-height:28px;border:1px solid #ccc;background:#fff;border-radius:3px;cursor:pointer;margin:0 6px 6px 0;font-size:12px;color:#333}
+.chroma-plugin .cm-btn:hover{border-color:#20a53a;color:#20a53a}
+.chroma-plugin .cm-btn.pri{background:#20a53a;border-color:#20a53a;color:#fff}
+.chroma-plugin .cm-btn.pri:hover{background:#10952a}
+.chroma-plugin .cm-btn.dng{color:#ef0808;border-color:#f3b3b3}
+.chroma-plugin .cm-btn.dng:hover{background:#ef0808;color:#fff}
+.chroma-plugin .cm-link{color:#20a53a;cursor:pointer;margin-right:10px}
+.chroma-plugin .cm-link.dng{color:#ef0808}
+.chroma-plugin .cm-row{display:flex;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.chroma-plugin .cm-row label{width:150px;color:#666;flex-shrink:0}
+.chroma-plugin .cm-row input[type=text],.chroma-plugin .cm-row input[type=number],.chroma-plugin .cm-row select,.chroma-plugin .cm-row textarea{border:1px solid #ccc;border-radius:3px;height:30px;padding:0 8px;width:260px;font-size:12px}
+.chroma-plugin .cm-row textarea{height:60px;padding:6px 8px;resize:vertical}
+.chroma-plugin .cm-help{color:#999;margin-left:150px;margin-top:-6px;margin-bottom:12px;line-height:1.6}
+.chroma-plugin .cm-note{background:#fff8e6;border:1px solid #f5dfa6;padding:10px 12px;border-radius:3px;margin-bottom:14px;line-height:1.7}
+.chroma-plugin .cm-note.ok{background:#effaf1;border-color:#bfe5c6}
+.chroma-plugin pre.cm-log{background:#1e1e1e;color:#d4d4d4;padding:10px;height:340px;overflow:auto;font-size:11px;line-height:1.5;white-space:pre-wrap;word-break:break-all;margin:0}
+.chroma-plugin pre.cm-code{background:#f6f8fa;border:1px solid #e6e6e6;padding:10px;font-size:11.5px;white-space:pre-wrap;word-break:break-all;margin:0 0 14px}
+.chroma-plugin .cm-token{font-family:monospace;background:#f6f8fa;padding:3px 6px;border:1px solid #e6e6e6;word-break:break-all}
+.chroma-plugin .cm-empty{color:#999;padding:20px;text-align:center}
+.cm-toast{position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:999999999;padding:10px 18px;border-radius:4px;color:#fff;font-size:13px;box-shadow:0 2px 10px rgba(0,0,0,.2);max-width:70%}
+.cm-toast.ok{background:#20a53a}.cm-toast.err{background:#ef0808}
+</style>
+
+<div class="chroma-plugin">
+  <div class="cm-menu">
+    <p class="on" data-pane="status" data-i18n="Status">Status</p>
+    <p data-pane="config" data-i18n="Settings">Settings</p>
+    <p data-pane="remote" data-i18n="Remote access">Remote access</p>
+    <p data-pane="collections" data-i18n="Collections">Collections</p>
+    <p data-pane="backups" data-i18n="Backups">Backups</p>
+    <p data-pane="logs" data-i18n="Logs">Logs</p>
+    <p data-pane="connect" data-i18n="Connect">Connect</p>
+    <div class="cm-lang"><span data-i18n="Language">Language</span>
+      <select id="cm-lang"><option value="en">English</option><option value="es">Español</option></select>
+      <div style="margin-top:8px;font-size:11px" id="cm-pver"></div>
+    </div>
+  </div>
+  <div class="cm-body">
+    <div class="cm-pane on" id="cm-status"></div>
+    <div class="cm-pane" id="cm-config"></div>
+    <div class="cm-pane" id="cm-remote"></div>
+    <div class="cm-pane" id="cm-collections"></div>
+    <div class="cm-pane" id="cm-backups"></div>
+    <div class="cm-pane" id="cm-logs"></div>
+    <div class="cm-pane" id="cm-connect"></div>
+  </div>
+</div>
+
+<script type="text/javascript">
+(function () {
+  var NAME = 'chromadb';
+  var AREA = [880, 620];
+  var installTimer = null;
+  var LANG = 'en';
+
+  /* ---------------- i18n (English source → Spanish) ---------------- */
+  var ES = {
+    'Status': 'Estado', 'Settings': 'Configuración', 'Remote access': 'Acceso remoto', 'Collections': 'Colecciones',
+    'Backups': 'Respaldos', 'Logs': 'Logs', 'Connect': 'Conexión', 'Language': 'Idioma',
+    'ChromaDB is not installed': 'ChromaDB no está instalado',
+    'ChromaDB is not installed. Go to <b>Status</b> to install it.': 'ChromaDB no está instalado. Ve a <b>Estado</b> para instalarlo.',
+    'INSTALL_NOTE': 'Se instalará en <b>/www/server/chromadb</b> con un Python 3.12 aislado y un usuario de sistema sin privilegios (<b>chroma</b>). El servicio escuchará <b>solo en 127.0.0.1</b> y arrancará automáticamente con el servidor. La descarga ocupa unos 300 MB.',
+    'Version': 'Versión', 'Install ChromaDB': 'Instalar ChromaDB', 'recommended': 'recomendada', 'latest': 'más reciente', 'installed': 'instalada',
+    'PyPI unreachable: only the default version is listed.': 'No se pudo consultar PyPI: solo se muestra la versión por defecto.',
+    'Service': 'Servicio', 'Running': 'En ejecución', 'Running (not responding)': 'En ejecución (sin respuesta)', 'Stopped': 'Detenido',
+    'since': 'desde', 'Local endpoint': 'Endpoint local', '(only reachable from this server)': '(solo accesible desde este servidor)',
+    'Enabled (nginx proxy with token)': 'Activado (proxy nginx con token)', 'Disabled': 'Desactivado', 'Enabled': 'Activado',
+    'Start on boot': 'Arranque automático', 'Yes (systemd)': 'Sí (systemd)', 'No': 'No', 'Memory': 'Memoria', 'limit': 'límite', 'Data': 'Datos',
+    'Restart': 'Reiniciar', 'Stop': 'Detener', 'Start': 'Iniciar', 'Refresh': 'Actualizar', 'Processing...': 'Procesando...',
+    'Install / upgrade to': 'Instalar/actualizar a', 'Apply version': 'Aplicar versión', 'Change version': 'Cambiar versión',
+    'chromadb=={0} will be installed and the service restarted. Creating a backup first is recommended. Continue?': 'Se instalará chromadb=={0} y se reiniciará el servicio. Te recomendamos crear un respaldo antes. ¿Continuar?',
+    'Uninstall': 'Desinstalar', 'Uninstall (keep data)': 'Desinstalar (conservar datos)', 'Uninstall and delete data': 'Desinstalar y borrar datos',
+    'The service will be stopped and removed. Data is kept in /www/server/chromadb/data. Continue?': 'Se detendrá y eliminará el servicio. Los datos se conservan en /www/server/chromadb/data. ¿Continuar?',
+    'Delete EVERYTHING': 'Borrar TODO',
+    'The service and ALL ChromaDB DATA will be removed irreversibly (backups in /www/backup/chromadb are kept). Continue?': 'Se eliminarán el servicio y TODOS LOS DATOS de ChromaDB de forma irreversible (los respaldos en /www/backup/chromadb se conservan). ¿Continuar?',
+    'Uninstalling...': 'Desinstalando...', 'Installing ChromaDB…': 'Instalando ChromaDB…', 'Starting…': 'Iniciando…',
+    'ChromaDB installed successfully': 'ChromaDB instalado correctamente', 'Installation finished with errors; check the log': 'La instalación terminó con errores; revisa el log',
+    'Continue': 'Continuar', 'Server settings': 'Configuración del servidor', 'Internal port': 'Puerto interno',
+    'ChromaDB always listens on 127.0.0.1 (not exposed). Apps on this server connect to http://127.0.0.1:PORT.': 'ChromaDB escucha siempre en 127.0.0.1 (no expuesto). Tus aplicaciones del servidor se conectan a http://127.0.0.1:PUERTO.',
+    'Memory limit': 'Límite de memoria', 'Hard systemd limit (MemoryMax). E.g. 512M, 2G, 4G.': 'Límite estricto de systemd (MemoryMax). Ej.: 512M, 2G, 4G.',
+    'Save and restart': 'Guardar y reiniciar', 'Applying...': 'Aplicando...',
+    'SECURITY_NOTE': '<b>Medidas de seguridad aplicadas:</b><br>· Servicio con usuario sin privilegios <b>chroma</b> y sin shell.<br>· Sistema de archivos de solo lectura salvo el directorio de datos (ProtectSystem=strict).<br>· Sin capacidades de kernel, sin escalada de privilegios, /tmp privado, sin dispositivos.<br>· Escucha solo en localhost; la exposición externa solo es posible mediante el proxy con token.<br>· Telemetría anónima desactivada · <code>allow_reset</code> desactivado.',
+    'Remote access (nginx proxy with token)': 'Acceso remoto (proxy nginx con token)',
+    'REMOTE_NOTE': 'Solo actívalo si una aplicación de <b>otro servidor</b> necesita conectarse. nginx exige el token en cada petición (<code>Authorization: Bearer TOKEN</code> o <code>X-Chroma-Token: TOKEN</code>), aplica la lista blanca de IPs y el límite de peticiones. El plugin abre el puerto en el firewall del panel solo para las IPs permitidas.',
+    'Public port': 'Puerto público', 'SSL certificate': 'Certificado SSL', 'No SSL (not recommended)': 'Sin SSL (no recomendado)',
+    "Uses one of your sites' certificate; connect with https://THAT-DOMAIN:PORT.": 'Usa el certificado de uno de tus sitios; conéctate con https://ESE-DOMINIO:PUERTO.',
+    'SSL requires nginx 1.25.1 or later (installed: {0}).': 'SSL requiere nginx 1.25.1 o superior (instalado: {0}).',
+    'Allowed IPs': 'IPs permitidas', 'One IP or CIDR network per line. Empty = any IP (token only).': 'Una IP o red CIDR por línea. Vacío = cualquier IP (solo token).',
+    'Rate limit per IP': 'Límite por IP', 'requests/second': 'peticiones/segundo', 'Token': 'Token',
+    'Regenerate token on save (invalidates the current one)': 'Regenerar token al guardar (invalida el actual)',
+    'Save': 'Guardar', 'Copy token': 'Copiar token', 'Token copied': 'Token copiado',
+    'Database': 'Base de datos', 'New database': 'Nueva base', 'New collection': 'Nueva colección', 'Loading…': 'Cargando…',
+    'Name of the new database:': 'Nombre de la nueva base de datos:', 'Name': 'Nombre', 'Metric': 'Métrica',
+    'cosine (recommended for text)': 'cosine (recomendada para texto)', 'l2 (euclidean)': 'l2 (euclidiana)', 'ip (inner product)': 'ip (producto interno)',
+    'New collection in {0}': 'Nueva colección en {0}', 'Create': 'Crear', 'Cancel': 'Cancelar', 'Confirm': 'Confirmar',
+    'Collection name:': 'Nombre de la colección:', 'No collections in this database.': 'No hay colecciones en esta base de datos.',
+    'Documents': 'Documentos', 'Dimension': 'Dimensión', 'Action': 'Acción', 'Delete': 'Eliminar', 'Delete collection': 'Eliminar colección',
+    'Collection "{0}" and all its documents will be deleted irreversibly. Continue?': 'Se eliminará la colección "{0}" y todos sus documentos de forma irreversible. ¿Continuar?',
+    'BACKUP_NOTE': 'El respaldo detiene ChromaDB unos segundos para garantizar una copia consistente. Se guardan en <b>/www/backup/chromadb</b>. Puedes programarlos con una tarea <b>Cron</b> del panel (tipo Shell script):',
+    'Back up now': 'Crear respaldo ahora', 'No backups.': 'No hay respaldos.', 'File': 'Archivo', 'Size': 'Tamaño', 'Date': 'Fecha',
+    'Download': 'Descargar', 'Restore': 'Restaurar', 'Creating backup...': 'Creando respaldo...', 'Restore backup': 'Restaurar respaldo',
+    'Current data will be replaced by {0}. Current data is moved to a separate folder (not deleted). Continue?': 'Se reemplazarán los datos actuales por los de {0}. Los datos actuales se moverán a una carpeta aparte (no se borran). ¿Continuar?',
+    'Restoring...': 'Restaurando...', 'Delete backup': 'Eliminar respaldo', 'Delete {0}?': '¿Eliminar {0}?',
+    'Service logs': 'Logs del servicio', '(empty)': '(vacío)',
+    'From this server (recommended)': 'Desde este servidor (recomendado)', 'From another server': 'Desde otro servidor',
+    '(remote access disabled)': '(acceso remoto desactivado)', 'Panel communication error ({0})': 'Error de comunicación con el panel ({0})'
+  };
+  var EN_LONG = {
+    'INSTALL_NOTE': 'It will be installed in <b>/www/server/chromadb</b> with an isolated Python 3.12 and an unprivileged system user (<b>chroma</b>). The service will listen <b>only on 127.0.0.1</b> and start automatically with the server. The download is about 300 MB.',
+    'SECURITY_NOTE': '<b>Security measures applied:</b><br>· Runs as the unprivileged <b>chroma</b> user with no shell.<br>· Read-only filesystem except for the data directory (ProtectSystem=strict).<br>· No kernel capabilities, no privilege escalation, private /tmp, no devices.<br>· Listens on localhost only; external exposure is only possible through the token proxy.<br>· Anonymous telemetry disabled · <code>allow_reset</code> disabled.',
+    'REMOTE_NOTE': 'Only enable this if an application on <b>another server</b> needs to connect. nginx requires the token on every request (<code>Authorization: Bearer TOKEN</code> or <code>X-Chroma-Token: TOKEN</code>) and applies the IP allow-list and the rate limit. The plugin opens the port in the panel firewall only for the allowed IPs.',
+    'BACKUP_NOTE': 'Backups stop ChromaDB for a few seconds to guarantee a consistent copy. They are stored in <b>/www/backup/chromadb</b>. You can schedule them with a panel <b>Cron</b> task (Shell script type):'
+  };
+  function t(s) {
+    var a = arguments, r = (LANG === 'es' && ES[s]) ? ES[s] : (EN_LONG[s] || s);
+    return r.replace(/\{(\d+)\}/g, function (m, i) { return a[+i + 1] !== undefined ? a[+i + 1] : m; });
+  }
+  function applyStatic() { $('.chroma-plugin [data-i18n]').each(function () { $(this).text(t($(this).data('i18n'))); }); }
+
+  /* ---------------- helpers ---------------- */
+  function esc(s) {
+    return String(s === undefined || s === null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function getCookie(n) {
+    var m = document.cookie.match(new RegExp('(?:^|; )' + n.replace(/[.$?*|{}()\[\]\\\/+^]/g, '\\$&') + '=([^;]*)'));
+    return m ? decodeURIComponent(m[1]) : '';
+  }
+  function tokenHeaders() {
+    var h = {};
+    var el = document.getElementById('request_token_head');
+    if (el && el.getAttribute('token')) h['x-http-token'] = el.getAttribute('token');
+    if (window.vite_public_request_token) h['x-http-token'] = window.vite_public_request_token;
+    var c = getCookie('request_token');
+    if (c) h['x-cookie-token'] = c;
+    return h;
+  }
+  function unwrap(r) {
+    if (r && typeof r === 'object') {
+      if (typeof r.status === 'number' && 'message' in r) {
+        var m = r.message;
+        if (m && typeof m === 'object' && typeof m.status === 'boolean' && 'msg' in m) return { ok: m.status, data: m.msg };
+        if (m && typeof m === 'object' && 'result' in m && Object.keys(m).length === 1) m = m.result;
+        return { ok: r.status === 0, data: m };
+      }
+      if (typeof r.status === 'boolean') return { ok: r.status, data: r.msg !== undefined ? r.msg : r };
+    }
+    return { ok: true, data: r };
+  }
+  function api(method, data, cb, loadingText) {
+    var idx = null;
+    if (loadingText && window.layer) idx = layer.msg(loadingText, { icon: 16, time: 0, shade: 0.3 });
+    $.ajax({
+      url: '/plugin?action=a&name=' + NAME + '&s=' + method,
+      type: 'POST', data: data || {}, dataType: 'json', headers: tokenHeaders(), timeout: 600000,
+      success: function (r) { if (idx !== null) layer.close(idx); cb(unwrap(r)); },
+      error: function (x) { if (idx !== null) layer.close(idx); cb({ ok: false, data: t('Panel communication error ({0})', x.status) }); }
+    });
+  }
+  function toast(msg, ok) {
+    var d = $('<div class="cm-toast ' + (ok ? 'ok' : 'err') + '"></div>').text(typeof msg === 'string' ? msg : JSON.stringify(msg));
+    $('body').append(d);
+    setTimeout(function () { d.fadeOut(300, function () { d.remove(); }); }, ok ? 3000 : 7000);
+  }
+  function confirmBox(title, msg, fn) {
+    if (window.layer && layer.confirm) {
+      var i = layer.confirm(esc(msg), { title: title, icon: 3, btn: [t('Confirm'), t('Cancel')], closeBtn: 2 }, function () { layer.close(i); fn(); });
+    } else if (window.confirm(msg)) { fn(); }
+  }
+  function bytes(n) {
+    n = Number(n) || 0;
+    var u = ['B', 'KB', 'MB', 'GB', 'TB'], i = 0;
+    while (n >= 1024 && i < u.length - 1) { n /= 1024; i++; }
+    return n.toFixed(i ? 1 : 0) + ' ' + u[i];
+  }
+  function ts(x) { return new Date(x * 1000).toLocaleString(); }
+  function done(after) { return function (r) { toast(r.data, r.ok); if (r.ok && after) after(); }; }
+
+  /* ---------------- layout & navigation ---------------- */
+  var $layer = $('.chroma-plugin').closest('.layui-layer-page');
+  if ($layer.length) {
+    $layer.css({ width: AREA[0] + 'px', height: AREA[1] + 'px',
+      left: (($(window).width() - AREA[0]) / 2) + 'px', top: Math.max(20, ($(window).height() - AREA[1]) / 2) + 'px' });
+    $('.chroma-plugin').css({ height: (AREA[1] - 42) + 'px' });
+  }
+  var current = 'status';
+  $('.chroma-plugin .cm-menu p').on('click', function () {
+    $(this).addClass('on').siblings().removeClass('on');
+    current = $(this).data('pane');
+    $('.chroma-plugin .cm-pane').removeClass('on');
+    $('#cm-' + current).addClass('on');
+    if (installTimer && current !== 'status') { clearInterval(installTimer); installTimer = null; }
+    render[current]();
+  });
+  $('#cm-lang').on('change', function () {
+    LANG = $(this).val();
+    api('set_lang', { lang: LANG }, function () {});
+    applyStatic();
+    render[current]();
+  });
+
+  var state = {};
+  function needInstalled(el) {
+    if (!state.installed) {
+      $(el).html('<div class="cm-empty">' + t('ChromaDB is not installed. Go to <b>Status</b> to install it.') + '</div>');
+      return false;
+    }
+    return true;
+  }
+  function versionSelect(id, selected, cb) {
+    api('get_versions', {}, function (r) {
+      if (!r.ok) return cb('<input type="text" id="' + id + '" value="' + esc(selected) + '">');
+      var v = r.data, h = '<select id="' + id + '" style="width:260px">';
+      v.versions.forEach(function (x) {
+        var tags = [];
+        if (x.version === v.recommended) tags.push(t('recommended'));
+        if (x.version === v.latest) tags.push(t('latest'));
+        if (x.version === v.installed) tags.push(t('installed'));
+        h += '<option value="' + esc(x.version) + '"' + (x.version === selected ? ' selected' : '') + '>' + esc(x.version) +
+             (x.date ? ' (' + esc(x.date) + ')' : '') + (tags.length ? ' — ' + tags.join(', ') : '') + '</option>';
+      });
+      h += '</select>';
+      if (!v.online) h += '<div style="color:#f0ad4e;width:100%;margin-left:150px;margin-top:4px">' + t('PyPI unreachable: only the default version is listed.') + '</div>';
+      cb(h);
+    });
+  }
+
+  var render = {};
+
+  /* ---------------- Status ---------------- */
+  render.status = function () {
+    api('get_status', {}, function (r) {
+      if (!r.ok) { $('#cm-status').html('<div class="cm-empty">' + esc(r.data) + '</div>'); return; }
+      var s = state = r.data, h = '';
+      if (s.installing) { return showInstallLog(); }
+      if (!s.installed) {
+        h += '<h3>' + t('ChromaDB is not installed') + '</h3>';
+        h += '<div class="cm-note">' + t('INSTALL_NOTE') + '</div>';
+        h += '<div class="cm-row"><label>' + t('Version') + '</label><span id="cm-vsel"></span></div>';
+        h += '<button class="cm-btn pri" id="cm-install">' + t('Install ChromaDB') + '</button>';
+        $('#cm-status').html(h);
+        versionSelect('cm-ver', s.target_version, function (html) { $('#cm-vsel').replaceWith(html); });
+        $('#cm-install').on('click', function () {
+          api('install', { version: $('#cm-ver').val() }, function (r) {
+            if (!r.ok) return toast(r.data, false);
+            showInstallLog();
+          });
+        });
+        return;
+      }
+      var dot = s.running ? (s.healthy ? 'ok' : 'warn') : 'bad';
+      var txt = s.running ? (s.healthy ? t('Running') : t('Running (not responding)')) : t('Stopped');
+      h += '<h3>' + t('Service') + '</h3><table class="cm-kv">';
+      h += '<tr><th>' + t('Status') + '</th><td><span class="cm-dot ' + dot + '"></span>' + txt + (s.running ? ' &nbsp;<span style="color:#999">PID ' + s.pid + ' · ' + t('since') + ' ' + esc(s.since) + '</span>' : '') + '</td></tr>';
+      h += '<tr><th>' + t('Version') + '</th><td>' + esc(s.version) + '</td></tr>';
+      h += '<tr><th>' + t('Local endpoint') + '</th><td><span class="cm-token">' + esc(s.endpoint) + '</span> <span style="color:#999">' + t('(only reachable from this server)') + '</span></td></tr>';
+      h += '<tr><th>' + t('Remote access') + '</th><td>' + (s.remote_enabled ? '<span class="cm-dot ok"></span>' + t('Enabled (nginx proxy with token)') : '<span class="cm-dot"></span>' + t('Disabled')) + '</td></tr>';
+      h += '<tr><th>' + t('Start on boot') + '</th><td>' + (s.enabled ? t('Yes (systemd)') : t('No')) + '</td></tr>';
+      h += '<tr><th>' + t('Memory') + '</th><td>' + bytes(s.memory) + ' / ' + t('limit') + ' ' + esc(s.memory_max) + '</td></tr>';
+      h += '<tr><th>' + t('Data') + '</th><td>' + bytes(s.data_size) + ' &nbsp;<span style="color:#999">/www/server/chromadb/data</span></td></tr>';
+      h += '</table>';
+      h += s.running ? '<button class="cm-btn" data-act="restart">' + t('Restart') + '</button><button class="cm-btn" data-act="stop">' + t('Stop') + '</button>'
+                     : '<button class="cm-btn pri" data-act="start">' + t('Start') + '</button>';
+      h += '<button class="cm-btn" id="cm-refresh">' + t('Refresh') + '</button>';
+      h += '<h3 style="margin-top:22px">' + t('Version') + '</h3>';
+      h += '<div class="cm-row"><label>' + t('Install / upgrade to') + '</label><span id="cm-vsel"></span>&nbsp;<button class="cm-btn" id="cm-upgrade" style="margin:0 0 0 6px">' + t('Apply version') + '</button></div>';
+      h += '<h3 style="margin-top:22px">' + t('Uninstall') + '</h3>';
+      h += '<button class="cm-btn dng" id="cm-uninst">' + t('Uninstall (keep data)') + '</button><button class="cm-btn dng" id="cm-purge">' + t('Uninstall and delete data') + '</button>';
+      $('#cm-status').html(h);
+      versionSelect('cm-ver', s.version, function (html) { $('#cm-vsel').replaceWith(html); });
+      $('#cm-status [data-act]').on('click', function () {
+        api('service_admin', { action: $(this).data('act') }, done(render.status), t('Processing...'));
+      });
+      $('#cm-refresh').on('click', render.status);
+      $('#cm-upgrade').on('click', function () {
+        var v = $('#cm-ver').val();
+        confirmBox(t('Change version'), t('chromadb=={0} will be installed and the service restarted. Creating a backup first is recommended. Continue?', v), function () {
+          api('install', { version: v }, function (r) { if (!r.ok) return toast(r.data, false); showInstallLog(); });
+        });
+      });
+      $('#cm-uninst').on('click', function () {
+        confirmBox(t('Uninstall'), t('The service will be stopped and removed. Data is kept in /www/server/chromadb/data. Continue?'), function () {
+          api('uninstall', { purge: 0 }, done(render.status), t('Uninstalling...'));
+        });
+      });
+      $('#cm-purge').on('click', function () {
+        confirmBox(t('Delete EVERYTHING'), t('The service and ALL ChromaDB DATA will be removed irreversibly (backups in /www/backup/chromadb are kept). Continue?'), function () {
+          api('uninstall', { purge: 1 }, done(render.status), t('Uninstalling...'));
+        });
+      });
+    });
+  };
+
+  function showInstallLog() {
+    $('#cm-status').html('<h3>' + t('Installing ChromaDB…') + '</h3><pre class="cm-log" id="cm-ilog">' + t('Starting…') + '</pre>');
+    if (installTimer) clearInterval(installTimer);
+    var poll = function () {
+      api('get_install_log', {}, function (r) {
+        if (!r.ok) return;
+        var $l = $('#cm-ilog');
+        if (!$l.length) { clearInterval(installTimer); installTimer = null; return; }
+        $l.text(r.data.log || '…');
+        $l.scrollTop($l[0].scrollHeight);
+        if (!r.data.installing) {
+          clearInterval(installTimer); installTimer = null;
+          toast(r.data.success ? t('ChromaDB installed successfully') : t('Installation finished with errors; check the log'), r.data.success);
+          $l.after('<div style="margin-top:10px"><button class="cm-btn pri" id="cm-back">' + t('Continue') + '</button></div>');
+          $('#cm-back').on('click', render.status);
+        }
+      });
+    };
+    poll();
+    installTimer = setInterval(poll, 2000);
+  }
+
+  /* ---------------- Settings ---------------- */
+  render.config = function () {
+    api('get_config', {}, function (r) {
+      if (!r.ok) return toast(r.data, false);
+      var c = r.data;
+      var h = '<h3>' + t('Server settings') + '</h3>';
+      h += '<div class="cm-row"><label>' + t('Internal port') + '</label><input type="number" id="cm-port" value="' + esc(c.port) + '" min="1024" max="65535"></div>';
+      h += '<div class="cm-help">' + t('ChromaDB always listens on 127.0.0.1 (not exposed). Apps on this server connect to http://127.0.0.1:PORT.') + '</div>';
+      h += '<div class="cm-row"><label>' + t('Memory limit') + '</label><input type="text" id="cm-mem" value="' + esc(c.memory_max) + '"></div>';
+      h += '<div class="cm-help">' + t('Hard systemd limit (MemoryMax). E.g. 512M, 2G, 4G.') + '</div>';
+      h += '<div class="cm-row"><label></label><button class="cm-btn pri" id="cm-save">' + t('Save and restart') + '</button></div>';
+      h += '<div class="cm-note ok" style="margin-top:20px">' + t('SECURITY_NOTE') + '</div>';
+      $('#cm-config').html(h);
+      $('#cm-save').on('click', function () {
+        api('save_config', { port: $('#cm-port').val(), memory_max: $('#cm-mem').val() }, done(), t('Applying...'));
+      });
+    });
+  };
+
+  /* ---------------- Remote access ---------------- */
+  render.remote = function () {
+    if (!needInstalled('#cm-remote')) return;
+    api('get_config', {}, function (r) {
+      if (!r.ok) return toast(r.data, false);
+      var c = r.data, rm = c.remote;
+      var h = '<h3>' + t('Remote access (nginx proxy with token)') + '</h3>';
+      h += '<div class="cm-note">' + t('REMOTE_NOTE') + '</div>';
+      h += '<div class="cm-row"><label>' + t('Status') + '</label><select id="cm-r-en"><option value="0">' + t('Disabled') + '</option><option value="1"' + (rm.enabled ? ' selected' : '') + '>' + t('Enabled') + '</option></select></div>';
+      h += '<div class="cm-row"><label>' + t('Public port') + '</label><input type="number" id="cm-r-port" value="' + esc(rm.port) + '"></div>';
+      var opts = '<option value="">' + t('No SSL (not recommended)') + '</option>';
+      (c.ssl_sites || []).forEach(function (s) { opts += '<option value="' + esc(s) + '"' + (rm.ssl_site === s ? ' selected' : '') + '>' + esc(s) + '</option>'; });
+      h += '<div class="cm-row"><label>' + t('SSL certificate') + '</label><select id="cm-r-ssl"' + (c.ssl_supported ? '' : ' disabled') + '>' + opts + '</select></div>';
+      h += '<div class="cm-help">' + (c.ssl_supported ? t("Uses one of your sites' certificate; connect with https://THAT-DOMAIN:PORT.")
+                                                      : '<span style="color:#ef0808">' + t('SSL requires nginx 1.25.1 or later (installed: {0}).', esc(c.nginx_version || '?')) + '</span>') + '</div>';
+      h += '<div class="cm-row"><label>' + t('Allowed IPs') + '</label><textarea id="cm-r-wl" placeholder="203.0.113.10\n198.51.100.0/24">' + esc((rm.whitelist || []).join('\n')) + '</textarea></div>';
+      h += '<div class="cm-help">' + t('One IP or CIDR network per line. Empty = any IP (token only).') + '</div>';
+      h += '<div class="cm-row"><label>' + t('Rate limit per IP') + '</label><input type="number" id="cm-r-rate" value="' + esc(rm.rate) + '" style="width:100px"> &nbsp;' + t('requests/second') + '</div>';
+      if (rm.token) {
+        h += '<div class="cm-row"><label>' + t('Token') + '</label><span class="cm-token" id="cm-r-tok">' + esc(rm.token) + '</span></div>';
+        h += '<div class="cm-row"><label></label><label style="width:auto;color:#333"><input type="checkbox" id="cm-r-regen"> ' + t('Regenerate token on save (invalidates the current one)') + '</label></div>';
+      }
+      h += '<div class="cm-row"><label></label><button class="cm-btn pri" id="cm-r-save">' + t('Save') + '</button>' + (rm.token ? '<button class="cm-btn" id="cm-r-copy">' + t('Copy token') + '</button>' : '') + '</div>';
+      $('#cm-remote').html(h);
+      $('#cm-r-copy').on('click', function () {
+        var tk = $('#cm-r-tok').text();
+        if (navigator.clipboard) navigator.clipboard.writeText(tk).then(function () { toast(t('Token copied'), true); });
+        else if (window.bt && bt.pub && bt.pub.copy_pass) bt.pub.copy_pass(tk);
+      });
+      $('#cm-r-save').on('click', function () {
+        api('save_remote', {
+          enabled: $('#cm-r-en').val(), port: $('#cm-r-port').val(), ssl_site: $('#cm-r-ssl').val() || '',
+          whitelist: $('#cm-r-wl').val(), rate: $('#cm-r-rate').val(), regen_token: $('#cm-r-regen').is(':checked') ? 1 : 0
+        }, done(render.remote), t('Applying...'));
+      });
+    });
+  };
+
+  /* ---------------- Collections ---------------- */
+  var curDb = 'default_database';
+  render.collections = function () {
+    if (!needInstalled('#cm-collections')) return;
+    api('get_databases', {}, function (r) {
+      if (!r.ok) { $('#cm-collections').html('<div class="cm-empty">' + esc(r.data) + '</div>'); return; }
+      var dbs = r.data || ['default_database'];
+      if (dbs.indexOf(curDb) < 0) curDb = dbs[0] || 'default_database';
+      var opts = dbs.map(function (d) { return '<option' + (d === curDb ? ' selected' : '') + '>' + esc(d) + '</option>'; }).join('');
+      var h = '<h3>' + t('Collections') + '</h3>';
+      h += '<div class="cm-row"><label style="width:100px">' + t('Database') + '</label><select id="cm-db" style="width:200px">' + opts + '</select>' +
+           '&nbsp;<button class="cm-btn" id="cm-newdb" style="margin:0 6px">' + t('New database') + '</button><button class="cm-btn pri" id="cm-newcol" style="margin:0">' + t('New collection') + '</button></div>';
+      h += '<div id="cm-coltbl"><div class="cm-empty">' + t('Loading…') + '</div></div>';
+      $('#cm-collections').html(h);
+      $('#cm-db').on('change', function () { curDb = $(this).val(); loadCols(); });
+      $('#cm-newdb').on('click', function () {
+        nameDialog(t('New database'), t('Name of the new database:'), function (n, close) {
+          api('create_database', { name: n }, function (r) { toast(r.data, r.ok); if (r.ok) { close(); curDb = n; render.collections(); } });
+        });
+      });
+      $('#cm-newcol').on('click', newColDialog);
+      loadCols();
+    });
+  };
+  function nameDialog(title, label, fn) {
+    if (!window.layer) { var n = prompt(label); if (n) fn(n, function () {}); return; }
+    layer.open({ type: 1, title: esc(title), area: '400px', btn: [t('Create'), t('Cancel')],
+      content: '<div style="padding:20px"><div style="margin-bottom:8px;color:#666">' + esc(label) + '</div><input type="text" id="cm-nd-name" style="width:100%;height:30px;border:1px solid #ccc;padding:0 8px"></div>',
+      yes: function (i) { var v = $('#cm-nd-name').val(); if (v) fn(v, function () { layer.close(i); }); } });
+  }
+  function newColDialog() {
+    var html = '<div style="padding:20px">' +
+      '<div style="display:flex;align-items:center;margin-bottom:12px"><label style="width:90px">' + t('Name') + '</label><input type="text" id="cm-nc-name" style="width:240px;height:30px;border:1px solid #ccc;padding:0 8px"></div>' +
+      '<div style="display:flex;align-items:center"><label style="width:90px">' + t('Metric') + '</label><select id="cm-nc-space" style="width:240px;height:30px;border:1px solid #ccc">' +
+      '<option value="cosine">' + t('cosine (recommended for text)') + '</option><option value="l2">' + t('l2 (euclidean)') + '</option><option value="ip">' + t('ip (inner product)') + '</option></select></div></div>';
+    if (window.layer) {
+      layer.open({ type: 1, title: esc(t('New collection in {0}', curDb)), area: '420px', content: html, btn: [t('Create'), t('Cancel')],
+        yes: function (i) {
+          api('create_collection', { database: curDb, name: $('#cm-nc-name').val(), space: $('#cm-nc-space').val() }, function (r) {
+            toast(r.data, r.ok); if (r.ok) { layer.close(i); loadCols(); }
+          });
+        } });
+    } else {
+      var n = prompt(t('Collection name:'));
+      if (n) api('create_collection', { database: curDb, name: n, space: 'cosine' }, done(loadCols));
+    }
+  }
+  function loadCols() {
+    api('get_collections', { database: curDb }, function (r) {
+      if (!r.ok) { $('#cm-coltbl').html('<div class="cm-empty">' + esc(r.data) + '</div>'); return; }
+      if (!r.data.length) { $('#cm-coltbl').html('<div class="cm-empty">' + t('No collections in this database.') + '</div>'); return; }
+      var h = '<table class="cm-tbl"><tr><th>' + t('Name') + '</th><th>' + t('Documents') + '</th><th>' + t('Dimension') + '</th><th>' + t('Metric') + '</th><th>ID</th><th style="text-align:right">' + t('Action') + '</th></tr>';
+      r.data.forEach(function (c) {
+        h += '<tr><td><b>' + esc(c.name) + '</b></td><td>' + esc(c.count) + '</td><td>' + esc(c.dimension || '—') + '</td><td>' + esc(c.space || '—') + '</td>' +
+             '<td style="color:#999;font-family:monospace;font-size:11px">' + esc(c.id) + '</td>' +
+             '<td style="text-align:right"><span class="cm-link dng" data-del="' + esc(c.name) + '">' + t('Delete') + '</span></td></tr>';
+      });
+      h += '</table>';
+      $('#cm-coltbl').html(h);
+      $('#cm-coltbl [data-del]').on('click', function () {
+        var n = $(this).attr('data-del');
+        confirmBox(t('Delete collection'), t('Collection "{0}" and all its documents will be deleted irreversibly. Continue?', n), function () {
+          api('delete_collection', { database: curDb, name: n }, done(loadCols));
+        });
+      });
+    });
+  }
+
+  /* ---------------- Backups ---------------- */
+  render.backups = function () {
+    if (!needInstalled('#cm-backups')) return;
+    api('get_backups', {}, function (r) {
+      var list = r.ok ? r.data : [];
+      var h = '<h3>' + t('Backups') + '</h3>';
+      h += '<div class="cm-note">' + t('BACKUP_NOTE') + '<br><code>/www/server/panel/pyenv/bin/python /www/server/panel/plugin/chromadb/chromadb_main.py backup</code></div>';
+      h += '<button class="cm-btn pri" id="cm-bk-new">' + t('Back up now') + '</button>';
+      if (!list.length) h += '<div class="cm-empty">' + t('No backups.') + '</div>';
+      else {
+        h += '<table class="cm-tbl" style="margin-top:8px"><tr><th>' + t('File') + '</th><th>' + t('Size') + '</th><th>' + t('Date') + '</th><th style="text-align:right">' + t('Action') + '</th></tr>';
+        list.forEach(function (b) {
+          h += '<tr><td>' + esc(b.name) + '</td><td>' + bytes(b.size) + '</td><td>' + ts(b.time) + '</td><td style="text-align:right">' +
+               '<a class="cm-link" href="/download?filename=' + encodeURIComponent(b.path) + '" target="_blank">' + t('Download') + '</a>' +
+               '<span class="cm-link" data-rs="' + esc(b.name) + '">' + t('Restore') + '</span><span class="cm-link dng" data-dl="' + esc(b.name) + '">' + t('Delete') + '</span></td></tr>';
+        });
+        h += '</table>';
+      }
+      $('#cm-backups').html(h);
+      $('#cm-bk-new').on('click', function () { api('create_backup', {}, done(render.backups), t('Creating backup...')); });
+      $('#cm-backups [data-rs]').on('click', function () {
+        var n = $(this).attr('data-rs');
+        confirmBox(t('Restore backup'), t('Current data will be replaced by {0}. Current data is moved to a separate folder (not deleted). Continue?', n), function () {
+          api('restore_backup', { name: n }, done(render.backups), t('Restoring...'));
+        });
+      });
+      $('#cm-backups [data-dl]').on('click', function () {
+        var n = $(this).attr('data-dl');
+        confirmBox(t('Delete backup'), t('Delete {0}?', n), function () { api('delete_backup', { name: n }, done(render.backups)); });
+      });
+    });
+  };
+
+  /* ---------------- Logs ---------------- */
+  render.logs = function () {
+    if (!needInstalled('#cm-logs')) return;
+    $('#cm-logs').html('<h3>' + t('Service logs') + ' <span style="font-weight:normal;color:#999">(journalctl -u chromadb)</span></h3><pre class="cm-log" id="cm-log">' + t('Loading…') + '</pre>' +
+      '<div style="margin-top:10px"><button class="cm-btn" id="cm-log-r">' + t('Refresh') + '</button></div>');
+    var load = function () {
+      api('get_logs', { lines: 500 }, function (r) {
+        var $l = $('#cm-log'); $l.text(r.ok ? (r.data.log || t('(empty)')) : r.data); $l.scrollTop($l[0].scrollHeight);
+      });
+    };
+    $('#cm-log-r').on('click', load);
+    load();
+  };
+
+  /* ---------------- Connect ---------------- */
+  render.connect = function () {
+    api('get_config', {}, function (r) {
+      if (!r.ok) return toast(r.data, false);
+      var c = r.data, rm = c.remote;
+      var host = rm.ssl_site ? rm.ssl_site : (location.hostname || 'SERVER-IP');
+      var h = '<h3>' + t('From this server (recommended)') + '</h3>';
+      h += '<pre class="cm-code"># Python  (pip install chromadb-client)\nimport chromadb\nclient = chromadb.HttpClient(host="127.0.0.1", port=' + c.port + ')\ncol = client.get_or_create_collection("docs")\ncol.add(ids=["1"], documents=["Hello world"])\nprint(col.query(query_texts=["greeting"], n_results=1))</pre>';
+      h += '<pre class="cm-code">// Node.js  (npm install chromadb)\nimport { ChromaClient } from "chromadb";\nconst client = new ChromaClient({ host: "127.0.0.1", port: ' + c.port + ' });</pre>';
+      h += '<pre class="cm-code"># PHP / curl (REST API v2)\ncurl http://127.0.0.1:' + c.port + '/api/v2/heartbeat</pre>';
+      h += '<h3>' + t('From another server') + ' ' + (rm.enabled ? '' : '<span style="font-weight:normal;color:#ef0808">' + t('(remote access disabled)') + '</span>') + '</h3>';
+      var tok = rm.token ? rm.token : 'YOUR_TOKEN';
+      h += '<pre class="cm-code">import chromadb\nclient = chromadb.HttpClient(\n    host="' + esc(host) + '", port=' + rm.port + ', ssl=' + (rm.ssl_site ? 'True' : 'False') + ',\n    headers={"Authorization": "Bearer ' + esc(tok) + '"},\n)</pre>';
+      h += '<pre class="cm-code">curl -H "Authorization: Bearer ' + esc(tok) + '" ' + (rm.ssl_site ? 'https' : 'http') + '://' + esc(host) + ':' + rm.port + '/api/v2/heartbeat</pre>';
+      $('#cm-connect').html(h);
+    });
+  };
+
+  /* ---------------- boot ---------------- */
+  api('get_lang', {}, function (r) {
+    if (r.ok && r.data) {
+      LANG = r.data.lang === 'es' ? 'es' : 'en';
+      $('#cm-pver').text('Plugin v' + (r.data.plugin_version || ''));
+    }
+    $('#cm-lang').val(LANG);
+    applyStatic();
+    render.status();
+  });
+})();
+</script>
