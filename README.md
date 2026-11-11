@@ -11,7 +11,7 @@ Installs and manages a [ChromaDB](https://www.trychroma.com/) vector database se
 - **Optional remote access** through an nginx proxy: token required on every request
   (`Authorization: Bearer <token>` or `X-Chroma-Token: <token>`), IP allow-list, per-IP rate limit,
   SSL using one of your sites' certificates, and automatic aaPanel firewall rules.
-- **Collections & databases**: list, create, delete.
+- **Collections & databases**: list, create and delete (single or multi-select collections; deleting a database requires typing its name, `default_database` is protected).
 - **Backups**: create (consistent, brief stop), restore (validated, previous data kept), download, delete,
   schedulable from panel Cron.
 - **Logs** (journald) and tested **connection examples** in Python, PHP and C++20 (local or remote, with your port/token filled in).

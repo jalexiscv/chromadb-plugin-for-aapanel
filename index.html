@@ -131,12 +131,19 @@
     'Create (or get) the collection': 'Crear (u obtener) la colección',
     'Insert or update documents with their embeddings': 'Insertar o actualizar documentos con sus embeddings',
     '(embeddings come from your model: OpenAI, Ollama, sentence-transformers...)': '(los embeddings los genera tu modelo: OpenAI, Ollama, sentence-transformers...)',
-    'Find the most similar ones': 'Buscar los más parecidos', 'with the curl extension.': 'con la extensión curl.', 'Build:': 'Compilar:'
+    'Find the most similar ones': 'Buscar los más parecidos', 'with the curl extension.': 'con la extensión curl.', 'Build:': 'Compilar:',
+    'Delete database': 'Eliminar base', 'Delete permanently': 'Eliminar definitivamente', 'Deleting...': 'Eliminando...',
+    'DELETE_DB_WARN': 'Se eliminará la base de datos {0} con sus <b>{1}</b> colecciones y <b>{2}</b> documentos. <b>Esta acción no se puede deshacer.</b> Si quieres conservar una copia, crea antes un respaldo.',
+    'Type the database name to confirm:': 'Escribe el nombre de la base de datos para confirmar:',
+    'The name does not match': 'El nombre no coincide', 'The default database cannot be deleted': 'La base de datos por defecto no se puede eliminar',
+    'Delete collections': 'Eliminar colecciones', 'Delete selected ({0})': 'Eliminar seleccionadas ({0})', '{0} collections deleted': '{0} colecciones eliminadas',
+    '{0} collections of "{1}" and all their documents will be deleted irreversibly: {2}. Continue?': 'Se eliminarán {0} colecciones de "{1}" y todos sus documentos de forma irreversible: {2}. ¿Continuar?'
   };
   var EN_LONG = {
     'INSTALL_NOTE': 'It will be installed in <b>/www/server/chromadb</b> with an isolated Python 3.12 and an unprivileged system user (<b>chroma</b>). The service will listen <b>only on 127.0.0.1</b> and start automatically with the server. The download is about 300 MB.',
     'SECURITY_NOTE': '<b>Security measures applied:</b><br>· Runs as the unprivileged <b>chroma</b> user with no shell.<br>· Read-only filesystem except for the data directory (ProtectSystem=strict).<br>· No kernel capabilities, no privilege escalation, private /tmp, no devices.<br>· Listens on localhost only; external exposure is only possible through the token proxy.<br>· Anonymous telemetry disabled · <code>allow_reset</code> disabled.',
     'REMOTE_NOTE': 'Only enable this if an application on <b>another server</b> needs to connect. nginx requires the token on every request (<code>Authorization: Bearer TOKEN</code> or <code>X-Chroma-Token: TOKEN</code>) and applies the IP allow-list and the rate limit. The plugin opens the port in the panel firewall only for the allowed IPs.',
+    'DELETE_DB_WARN': 'Database {0} will be deleted together with its <b>{1}</b> collections and <b>{2}</b> documents. <b>This cannot be undone.</b> Create a backup first if you want to keep a copy.',
     'BACKUP_NOTE': 'Backups stop ChromaDB for a few seconds to guarantee a consistent copy. They are stored in <b>/www/backup/chromadb</b>. You can schedule them with a panel <b>Cron</b> task (Shell script type):'
   };
   function t(s) {
@@ -410,10 +417,14 @@
       var opts = dbs.map(function (d) { return '<option' + (d === curDb ? ' selected' : '') + '>' + esc(d) + '</option>'; }).join('');
       var h = '<h3>' + t('Collections') + '</h3>';
       h += '<div class="cm-row"><label style="width:100px">' + t('Database') + '</label><select id="cm-db" style="width:200px">' + opts + '</select>' +
-           '&nbsp;<button class="cm-btn" id="cm-newdb" style="margin:0 6px">' + t('New database') + '</button><button class="cm-btn pri" id="cm-newcol" style="margin:0">' + t('New collection') + '</button></div>';
+           '&nbsp;<button class="cm-btn" id="cm-newdb" style="margin:0 6px">' + t('New database') + '</button><button class="cm-btn pri" id="cm-newcol" style="margin:0 6px 0 0">' + t('New collection') + '</button>' +
+           '<button class="cm-btn dng" id="cm-deldb" style="margin:0">' + t('Delete database') + '</button></div>';
       h += '<div id="cm-coltbl"><div class="cm-empty">' + t('Loading…') + '</div></div>';
       $('#cm-collections').html(h);
-      $('#cm-db').on('change', function () { curDb = $(this).val(); loadCols(); });
+      var syncDelDb = function () { $('#cm-deldb').toggle(curDb !== 'default_database'); };
+      syncDelDb();
+      $('#cm-db').on('change', function () { curDb = $(this).val(); syncDelDb(); loadCols(); });
+      $('#cm-deldb').on('click', deleteDbDialog);
       $('#cm-newdb').on('click', function () {
         nameDialog(t('New database'), t('Name of the new database:'), function (n, close) {
           api('create_database', { db_name: n }, function (r) { toast(r.data, r.ok); if (r.ok) { close(); curDb = n; render.collections(); } });
@@ -446,18 +457,70 @@
       if (n) api('create_collection', { database: curDb, collection: n, space: 'cosine' }, done(loadCols));
     }
   }
+  var curCols = [];
+  function deleteDbDialog() {
+    if (curDb === 'default_database') return toast(t('The default database cannot be deleted'), false);
+    var db = curDb, nCols = curCols.length, nDocs = 0;
+    curCols.forEach(function (c) { nDocs += (typeof c.count === 'number' ? c.count : 0); });
+    var html = '<div style="padding:20px;line-height:1.7">' +
+      '<div class="cm-note" style="background:#fdecea;border:1px solid #f5c2c0;padding:10px 12px;border-radius:3px;margin-bottom:14px">' +
+      t('DELETE_DB_WARN', '<b>' + esc(db) + '</b>', nCols, nDocs) + '</div>' +
+      '<div style="margin-bottom:6px;color:#666">' + t('Type the database name to confirm:') + ' <b>' + esc(db) + '</b></div>' +
+      '<input type="text" id="cm-dd-confirm" autocomplete="off" style="width:100%;height:30px;border:1px solid #ccc;padding:0 8px"></div>';
+    var run = function (i) {
+      var typed = $('#cm-dd-confirm').val();
+      if (typed !== db) return toast(t('The name does not match'), false);
+      api('delete_database', { db_name: db, confirm: typed }, function (r) {
+        toast(r.data, r.ok);
+        if (r.ok) { if (i !== undefined && window.layer) layer.close(i); curDb = 'default_database'; render.collections(); }
+      }, t('Deleting...'));
+    };
+    if (window.layer) {
+      layer.open({ type: 1, title: esc(t('Delete database')), area: '460px', content: html, btn: [t('Delete permanently'), t('Cancel')], yes: run });
+    } else {
+      var v = prompt(t('Type the database name to confirm:') + ' ' + db);
+      if (v === db) api('delete_database', { db_name: db, confirm: v }, done(function () { curDb = 'default_database'; render.collections(); }));
+    }
+  }
+  function deleteSelected() {
+    var names = $('#cm-coltbl .cm-chk:checked').map(function () { return $(this).val(); }).get();
+    if (!names.length) return;
+    confirmBox(t('Delete collections'), t('{0} collections of "{1}" and all their documents will be deleted irreversibly: {2}. Continue?', names.length, curDb, names.join(', ')), function () {
+      var errors = [], i = 0, idx = window.layer ? layer.msg(t('Deleting...'), { icon: 16, time: 0, shade: 0.3 }) : null;
+      var next = function () {
+        if (i >= names.length) {
+          if (idx !== null) layer.close(idx);
+          if (errors.length) toast(errors.join(' · '), false); else toast(t('{0} collections deleted', names.length), true);
+          return loadCols();
+        }
+        var n = names[i++];
+        api('delete_collection', { database: curDb, collection: n }, function (r) { if (!r.ok) errors.push(n + ': ' + r.data); next(); });
+      };
+      next();
+    });
+  }
   function loadCols() {
     api('get_collections', { database: curDb }, function (r) {
+      curCols = r.ok ? r.data : [];
       if (!r.ok) { $('#cm-coltbl').html('<div class="cm-empty">' + esc(r.data) + '</div>'); return; }
       if (!r.data.length) { $('#cm-coltbl').html('<div class="cm-empty">' + t('No collections in this database.') + '</div>'); return; }
-      var h = '<table class="cm-tbl"><tr><th>' + t('Name') + '</th><th>' + t('Documents') + '</th><th>' + t('Dimension') + '</th><th>' + t('Metric') + '</th><th>ID</th><th style="text-align:right">' + t('Action') + '</th></tr>';
+      var h = '<div style="margin-bottom:6px;min-height:30px"><button class="cm-btn dng" id="cm-delsel" style="display:none;margin:0"></button></div>';
+      h += '<table class="cm-tbl"><tr><th style="width:24px"><input type="checkbox" id="cm-chkall"></th><th>' + t('Name') + '</th><th>' + t('Documents') + '</th><th>' + t('Dimension') + '</th><th>' + t('Metric') + '</th><th>ID</th><th style="text-align:right">' + t('Action') + '</th></tr>';
       r.data.forEach(function (c) {
-        h += '<tr><td><b>' + esc(c.name) + '</b></td><td>' + esc(c.count) + '</td><td>' + esc(c.dimension || '—') + '</td><td>' + esc(c.space || '—') + '</td>' +
+        h += '<tr><td><input type="checkbox" class="cm-chk" value="' + esc(c.name) + '"></td><td><b>' + esc(c.name) + '</b></td><td>' + esc(c.count) + '</td><td>' + esc(c.dimension || '—') + '</td><td>' + esc(c.space || '—') + '</td>' +
              '<td style="color:#999;font-family:monospace;font-size:11px">' + esc(c.id) + '</td>' +
              '<td style="text-align:right"><span class="cm-link dng" data-del="' + esc(c.name) + '">' + t('Delete') + '</span></td></tr>';
       });
       h += '</table>';
       $('#cm-coltbl').html(h);
+      var syncSel = function () {
+        var n = $('#cm-coltbl .cm-chk:checked').length;
+        $('#cm-delsel').text(t('Delete selected ({0})', n)).toggle(n > 0);
+        $('#cm-chkall').prop('checked', n > 0 && n === $('#cm-coltbl .cm-chk').length);
+      };
+      $('#cm-chkall').on('change', function () { $('#cm-coltbl .cm-chk').prop('checked', this.checked); syncSel(); });
+      $('#cm-coltbl .cm-chk').on('change', syncSel);
+      $('#cm-delsel').on('click', deleteSelected);
       $('#cm-coltbl [data-del]').on('click', function () {
         var n = $(this).attr('data-del');
         confirmBox(t('Delete collection'), t('Collection "{0}" and all its documents will be deleted irreversibly. Continue?', n), function () {

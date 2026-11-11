@@ -3,7 +3,7 @@
     "name": "chromadb",
     "type": "plugin",
     "ps": "ChromaDB vector database manager: one-click install, hardened systemd service (localhost only), optional remote access with token/IP allow-list/SSL, collections and backups. EN/ES.",
-    "versions": "1.2.0",
+    "versions": "1.3.0",
     "checks": [
         "/www/server/panel/plugin/chromadb"
     ],

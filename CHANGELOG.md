@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.0 — 2026-11-10
+- Delete databases (with all their collections). Shows how many collections/documents will be lost,
+  requires typing the database name (checked again server-side) and protects `default_database`.
+- Multi-select collections with "select all" and bulk delete.
+
 ## 1.2.0 — 2026-11-10
 - Connect tab rewritten: complete, tested examples in **Python, PHP 8 and C++20** (libcurl + nlohmann/json)
   that create a collection, upsert documents with embeddings and run a similarity query.

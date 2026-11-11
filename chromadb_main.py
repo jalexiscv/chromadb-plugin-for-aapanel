@@ -27,7 +27,7 @@ os.chdir(BASE_PATH)
 sys.path.insert(0, "class/")
 import public  # noqa: E402
 
-PLUGIN_VERSION = "1.2.0"
+PLUGIN_VERSION = "1.3.0"
 PLUGIN_PATH = BASE_PATH + "/plugin/chromadb"
 ROOT = "/www/server/chromadb"
 VENV = ROOT + "/venv"
@@ -123,6 +123,10 @@ ES = {
     "Invalid name": "Nombre inválido",
     "Collection deleted": "Colección eliminada",
     "Database created": "Base de datos creada",
+    "The default database cannot be deleted": "La base de datos por defecto no se puede eliminar",
+    "Confirmation does not match the database name": "La confirmación no coincide con el nombre de la base de datos",
+    "Database not found": "Base de datos no encontrada",
+    "Database {0} deleted ({1} collections removed)": "Base de datos {0} eliminada ({1} colecciones borradas)",
     "No data to back up": "No hay datos que respaldar",
     "Backup error: ": "Error al crear el respaldo: ",
     "Backup created: ": "Respaldo creado: ",
@@ -831,6 +835,31 @@ server {{
             return self._err(self._("Error: ") + str(data))
         public.WriteLog("ChromaDB", "Database created: " + name)
         return self._ok(self._("Database created"))
+
+    def delete_database(self, get):
+        """Delete a database and ALL its collections. Requires the name typed again as confirmation."""
+        s = self._settings()
+        name = str(getattr(get, "db_name", "")).strip()
+        confirm = str(getattr(get, "confirm", "")).strip()
+        if not NAME_RE.match(name):
+            return self._err(self._("Invalid name"))
+        if name == "default_database":
+            return self._err(self._("The default database cannot be deleted"))
+        if confirm != name:
+            return self._err(self._("Confirmation does not match the database name"))
+        code, cols = self._api(s["port"], "GET", self._db_base(name) + "/collections?limit=1000")
+        if code == 404:
+            return self._err(self._("Database not found"))
+        if code != 200:
+            return self._err(self._("Could not query ChromaDB (is it running?)"))
+        n_cols = len(cols or [])
+        code, data = self._api(s["port"], "DELETE", "/api/v2/tenants/{}/databases/{}".format(TENANT, name))
+        if code == 404:
+            return self._err(self._("Database not found"))
+        if code != 200:
+            return self._err(self._("Error: ") + str(data))
+        public.WriteLog("ChromaDB", "Database deleted: {} ({} collections)".format(name, n_cols))
+        return self._ok(self._("Database {0} deleted ({1} collections removed)", name, n_cols))
 
     # ------------------------------------------------------------------
     # Backups
