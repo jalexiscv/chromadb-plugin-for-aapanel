@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.1 — 2026-11-10
+- Fix: creating databases/collections, deleting collections and restoring/deleting backups did nothing from the UI.
+  The form field `name` overrode the `name=chromadb` routing key of aaPanel's `/plugin` endpoint, so the request
+  was sent to a non-existent plugin. Parameters renamed to `db_name`, `collection` and `file`.
+
 ## 1.1.0 — 2026-11-10
 - English / Spanish interface (follows the panel language; switchable in the plugin).
 - Version picker fed from PyPI (stable releases ≥ 1.0.0, with dates; cached 6 h; offline fallback).

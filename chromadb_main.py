@@ -27,7 +27,7 @@ os.chdir(BASE_PATH)
 sys.path.insert(0, "class/")
 import public  # noqa: E402
 
-PLUGIN_VERSION = "1.1.0"
+PLUGIN_VERSION = "1.1.1"
 PLUGIN_PATH = BASE_PATH + "/plugin/chromadb"
 ROOT = "/www/server/chromadb"
 VENV = ROOT + "/venv"
@@ -159,6 +159,8 @@ def _vtuple(v):
 
 
 class chromadb_main:
+    # NOTE: never use a request parameter called "name": aaPanel routes /plugin?action=a&name=<plugin>
+    # by that key, and a POST field with the same name overrides it (the call goes to another plugin).
 
     # ------------------------------------------------------------------
     # Settings / i18n
@@ -794,7 +796,7 @@ server {{
     def create_collection(self, get):
         s = self._settings()
         db = getattr(get, "database", "default_database") or "default_database"
-        name = str(getattr(get, "name", "")).strip()
+        name = str(getattr(get, "collection", "")).strip()
         space = getattr(get, "space", "cosine")
         if not NAME_RE.match(db) or not NAME_RE.match(name):
             return self._err(self._("Invalid name: 3-512 characters [a-zA-Z0-9._-], starting and ending with an alphanumeric"))
@@ -810,7 +812,7 @@ server {{
     def delete_collection(self, get):
         s = self._settings()
         db = getattr(get, "database", "default_database") or "default_database"
-        name = str(getattr(get, "name", "")).strip()
+        name = str(getattr(get, "collection", "")).strip()
         if not NAME_RE.match(db) or not NAME_RE.match(name):
             return self._err(self._("Invalid name"))
         code, data = self._api(s["port"], "DELETE", self._db_base(db) + "/collections/" + name)
@@ -821,7 +823,7 @@ server {{
 
     def create_database(self, get):
         s = self._settings()
-        name = str(getattr(get, "name", "")).strip()
+        name = str(getattr(get, "db_name", "")).strip()
         if not NAME_RE.match(name):
             return self._err(self._("Invalid name"))
         code, data = self._api(s["port"], "POST", "/api/v2/tenants/{}/databases".format(TENANT), {"name": name})
@@ -870,7 +872,7 @@ server {{
         return self._ok(self._("Backup created: ") + name)
 
     def _backup_path(self, get):
-        name = os.path.basename(str(getattr(get, "name", "")))
+        name = os.path.basename(str(getattr(get, "file", "")))
         if not BACKUP_RE.match(name):
             return None
         p = os.path.join(BACKUP_DIR, name)

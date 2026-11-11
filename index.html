@@ -408,7 +408,7 @@
       $('#cm-db').on('change', function () { curDb = $(this).val(); loadCols(); });
       $('#cm-newdb').on('click', function () {
         nameDialog(t('New database'), t('Name of the new database:'), function (n, close) {
-          api('create_database', { name: n }, function (r) { toast(r.data, r.ok); if (r.ok) { close(); curDb = n; render.collections(); } });
+          api('create_database', { db_name: n }, function (r) { toast(r.data, r.ok); if (r.ok) { close(); curDb = n; render.collections(); } });
         });
       });
       $('#cm-newcol').on('click', newColDialog);
@@ -429,13 +429,13 @@
     if (window.layer) {
       layer.open({ type: 1, title: esc(t('New collection in {0}', curDb)), area: '420px', content: html, btn: [t('Create'), t('Cancel')],
         yes: function (i) {
-          api('create_collection', { database: curDb, name: $('#cm-nc-name').val(), space: $('#cm-nc-space').val() }, function (r) {
+          api('create_collection', { database: curDb, collection: $('#cm-nc-name').val(), space: $('#cm-nc-space').val() }, function (r) {
             toast(r.data, r.ok); if (r.ok) { layer.close(i); loadCols(); }
           });
         } });
     } else {
       var n = prompt(t('Collection name:'));
-      if (n) api('create_collection', { database: curDb, name: n, space: 'cosine' }, done(loadCols));
+      if (n) api('create_collection', { database: curDb, collection: n, space: 'cosine' }, done(loadCols));
     }
   }
   function loadCols() {
@@ -453,7 +453,7 @@
       $('#cm-coltbl [data-del]').on('click', function () {
         var n = $(this).attr('data-del');
         confirmBox(t('Delete collection'), t('Collection "{0}" and all its documents will be deleted irreversibly. Continue?', n), function () {
-          api('delete_collection', { database: curDb, name: n }, done(loadCols));
+          api('delete_collection', { database: curDb, collection: n }, done(loadCols));
         });
       });
     });
@@ -482,12 +482,12 @@
       $('#cm-backups [data-rs]').on('click', function () {
         var n = $(this).attr('data-rs');
         confirmBox(t('Restore backup'), t('Current data will be replaced by {0}. Current data is moved to a separate folder (not deleted). Continue?', n), function () {
-          api('restore_backup', { name: n }, done(render.backups), t('Restoring...'));
+          api('restore_backup', { file: n }, done(render.backups), t('Restoring...'));
         });
       });
       $('#cm-backups [data-dl]').on('click', function () {
         var n = $(this).attr('data-dl');
-        confirmBox(t('Delete backup'), t('Delete {0}?', n), function () { api('delete_backup', { name: n }, done(render.backups)); });
+        confirmBox(t('Delete backup'), t('Delete {0}?', n), function () { api('delete_backup', { file: n }, done(render.backups)); });
       });
     });
   };
