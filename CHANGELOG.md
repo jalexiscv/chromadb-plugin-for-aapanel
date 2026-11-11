@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.0 — 2026-11-10
+- Connect tab rewritten: complete, tested examples in **Python, PHP 8 and C++20** (libcurl + nlohmann/json)
+  that create a collection, upsert documents with embeddings and run a similarity query.
+- Switch between "this server" and "another server": URL, port, SSL and token are filled in from your settings.
+- Copy-code button and a quick `curl` health check. Node.js snippet removed.
+
 ## 1.1.1 — 2026-11-10
 - Fix: creating databases/collections, deleting collections and restoring/deleting backups did nothing from the UI.
   The form field `name` overrode the `name=chromadb` routing key of aaPanel's `/plugin` endpoint, so the request

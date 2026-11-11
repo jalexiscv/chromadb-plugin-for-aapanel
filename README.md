@@ -14,7 +14,7 @@ Installs and manages a [ChromaDB](https://www.trychroma.com/) vector database se
 - **Collections & databases**: list, create, delete.
 - **Backups**: create (consistent, brief stop), restore (validated, previous data kept), download, delete,
   schedulable from panel Cron.
-- **Logs** (journald) and copy-paste **connection snippets** (Python, Node.js, curl).
+- **Logs** (journald) and tested **connection examples** in Python, PHP and C++20 (local or remote, with your port/token filled in).
 - English / Spanish UI.
 
 ## Requirements
@@ -76,7 +76,7 @@ Instala y administra un servidor de base de datos vectorial [ChromaDB](https://w
 **Funciones:** instalación/actualización/desinstalación en un clic (versiones estables ≥ 1.0.0 desde PyPI);
 servicio systemd endurecido con usuario `chroma`, solo en `127.0.0.1`; acceso remoto opcional mediante proxy nginx
 con token, lista blanca de IPs, límite de peticiones, SSL y reglas automáticas en el firewall del panel;
-colecciones y bases de datos; respaldos (crear, restaurar, descargar, programar con Cron); logs; ejemplos de conexión;
+colecciones y bases de datos; respaldos (crear, restaurar, descargar, programar con Cron); logs; ejemplos de conexión probados en Python, PHP y C++20;
 interfaz en español e inglés.
 
 **Instalación del plugin:** descarga el zip desde [Releases](https://github.com/jalexiscv/chromadb-plugin-for-aapanel/releases/latest); luego aaPanel → **App Store** → **Third-party** → **Import plugin** → sube el zip.

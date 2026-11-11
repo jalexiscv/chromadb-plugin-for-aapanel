@@ -27,7 +27,7 @@ os.chdir(BASE_PATH)
 sys.path.insert(0, "class/")
 import public  # noqa: E402
 
-PLUGIN_VERSION = "1.1.1"
+PLUGIN_VERSION = "1.2.0"
 PLUGIN_PATH = BASE_PATH + "/plugin/chromadb"
 ROOT = "/www/server/chromadb"
 VENV = ROOT + "/venv"
